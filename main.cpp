@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include <string>
 #include <sstream>
+#include <chrono>
+
 using namespace std;
 
 const int N = 3;
@@ -253,12 +255,21 @@ int main() {
     int algo;
     cin >> algo;
 
+    using namespace chrono;
+    auto start = high_resolution_clock::now();
+
     if (algo == 1)
         uniformCostSearch(initial_state);
     else if (algo == 2)
         misplacedTileSearch(initial_state);
     else if (algo == 3)
         manhattanDistanceSearch(initial_state);
-    else
+    else {
         cout << "Invalid selection.\n";
+        return 0;
+    }
+
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(end - start);
+    cout << "Time taken: " << duration.count() << " milliseconds\n";
 }
