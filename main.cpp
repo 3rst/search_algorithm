@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <mach/mach.h>
 
 using namespace std;
 
@@ -18,6 +19,13 @@ vector<vector<int>> generateGoalState() {
         for (int j = 0; j < N; ++j)
             goal[i][j] = (val == N * N) ? 0 : val++;
     return goal;
+}
+
+size_t getMemoryUsage() {
+    task_basic_info info;
+    mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
+    task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &count);
+    return info.resident_size; // in bytes
 }
 
 int countMisplacedTiles(const vector<vector<int>>& state) {
@@ -238,7 +246,6 @@ void manhattanDistanceSearch(const vector<vector<int>>& initial_state) {
     cout << "Failure\n";
 }
 
-
 vector<vector<int>> inputPuzzle(const string& label) {
     vector<vector<int>> puzzle(N, vector<int>(N));
     cout << "Enter the " << label << " puzzle row by row (use 0 for blank):\n";
@@ -272,6 +279,7 @@ int main() {
     using namespace chrono;
     auto start = high_resolution_clock::now();
 
+    size_t before = getMemoryUsage();
     if (algo == 1)
         uniformCostSearch(initial_state);
     else if (algo == 2)
@@ -282,8 +290,10 @@ int main() {
         cout << "Invalid selection.\n";
         return 0;
     }
+    size_t after = getMemoryUsage();
 
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(end - start);
     cout << "Time taken: " << duration.count() << " milliseconds\n";
+    std::cout << "Memory used: " << (after - before) << " bytes\n";
 }
