@@ -6,7 +6,7 @@
 #include <sstream>
 using namespace std;
 
-const int N = 4;
+const int N = 3;
 vector<vector<int>> goal_state;
 
 vector<vector<int>> generateGoalState() {
@@ -69,7 +69,7 @@ vector<PuzzleState*> expand(PuzzleState* node) {
         if (nx >= 0 && nx < N && ny >= 0 && ny < N) {
             vector<vector<int>> new_state = s;
             swap(new_state[x][y], new_state[nx][ny]);
-            children.push_back(new PuzzleState(new_state, node->g + 1, node));
+            children.push_back(new PuzzleState(new_state, node->g + 1, 0, node));
         }
     }
     return children;
@@ -91,16 +91,16 @@ void printState(const vector<vector<int>>& state) {
 }
 
 void uniformCostSearch(const vector<vector<int>>& initial_state) {
-    priority_queue<PuzzleState*, vector<PuzzleState*>, Compare> frontier;
+    priority_queue<PuzzleState*, vector<PuzzleState*>, Compare> search_queue;
     unordered_set<string> explored;
-    frontier.push(new PuzzleState(initial_state, 0));
+    search_queue.push(new PuzzleState(initial_state, 0));
 
     int nodes_expanded = 0;
     int max_queue_size = 1;
 
-    while (!frontier.empty()) {
-        PuzzleState* node = frontier.top();
-        frontier.pop();
+    while (!search_queue.empty()) {
+        PuzzleState* node = search_queue.top();
+        search_queue.pop();
 
         string sig = stateToString(node->state);
         if (explored.count(sig)) continue;
@@ -120,9 +120,51 @@ void uniformCostSearch(const vector<vector<int>>& initial_state) {
 
         auto children = expand(node);
         for (PuzzleState* child : children) {
-            frontier.push(child);
+            search_queue.push(child);
         }
-        max_queue_size = max(max_queue_size, (int)frontier.size());
+        max_queue_size = max(max_queue_size, (int)search_queue.size());
+    }
+    cout << "Failure\n";
+}
+
+void misplacedTileSearch(const vector<vector<int>>& initial_state) {
+    priority_queue<PuzzleState*, vector<PuzzleState*>, CompareAStar> search_queue;
+    unordered_set<string> explored;
+
+    int h = countMisplacedTiles(initial_state);
+    search_queue.push(new PuzzleState(initial_state, 0, h));
+
+    int nodes_expanded = 0;
+    int max_queue_size = 1;
+
+    while (!search_queue.empty()) {
+        PuzzleState* node = search_queue.top();
+        search_queue.pop();
+
+        string sig = stateToString(node->state);
+        if (explored.count(sig)) continue;
+        explored.insert(sig);
+
+        cout << "The best state to expand with a g(n) = " << node->g
+             << " and h(n) = " << node->h << " is...\n";
+        printState(node->state);
+        nodes_expanded++;
+
+        if (isGoal(node->state)) {
+            cout << "Goal state!\n";
+            cout << "Solution depth was " << node->g << endl;
+            cout << "Number of nodes expanded: " << nodes_expanded << endl;
+            cout << "Max queue size: " << max_queue_size << endl;
+            return;
+        }
+
+        auto children = expand(node);
+        for (PuzzleState* child : children) {
+            child->h = countMisplacedTiles(child->state);
+            child->f = child->g + child->h;
+            search_queue.push(child);
+        }
+        max_queue_size = max(max_queue_size, (int)search_queue.size());
     }
     cout << "Failure\n";
 }
@@ -159,6 +201,10 @@ int main() {
 
     if (algo == 1)
         uniformCostSearch(initial_state);
+    else if (algo == 2)
+        misplacedTileSearch(initial_state);
+    // else if (algo == 3)
+    //     manhattanDistanceSearch(initial_state);
     else
-        cout << "Selected heuristic not implemented yet.\n";
+        cout << "Invalid selection.\n";
 }
