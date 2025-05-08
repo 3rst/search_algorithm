@@ -36,9 +36,9 @@ struct PuzzleState {
         : state(s), g(g_val), h(h_val), f(g_val + h_val), parent(p) {}
 };
 
-struct CompareAStar {
+struct CompareUsingF {
     bool operator()(PuzzleState* a, PuzzleState* b) {
-        return a->f > b->f;
+        return a->f > b->f; // Min-heap based on f = g + h
     }
 };
 
@@ -75,12 +75,6 @@ vector<PuzzleState*> expand(PuzzleState* node) {
     return children;
 }
 
-struct Compare {
-    bool operator()(PuzzleState* a, PuzzleState* b) {
-        return a->g > b->g;
-    }
-};
-
 void printState(const vector<vector<int>>& state) {
     for (const auto& row : state) {
         cout << "[";
@@ -91,9 +85,9 @@ void printState(const vector<vector<int>>& state) {
 }
 
 void uniformCostSearch(const vector<vector<int>>& initial_state) {
-    priority_queue<PuzzleState*, vector<PuzzleState*>, Compare> search_queue;
+    priority_queue<PuzzleState*, vector<PuzzleState*>, CompareUsingF> search_queue;
     unordered_set<string> explored;
-    search_queue.push(new PuzzleState(initial_state, 0));
+    search_queue.push(new PuzzleState(initial_state, 0, 0));
 
     int nodes_expanded = 0;
     int max_queue_size = 1;
@@ -120,6 +114,8 @@ void uniformCostSearch(const vector<vector<int>>& initial_state) {
 
         auto children = expand(node);
         for (PuzzleState* child : children) {
+            child->h = 0;
+            child->f = child->g + child->h;
             search_queue.push(child);
         }
         max_queue_size = max(max_queue_size, (int)search_queue.size());
@@ -128,7 +124,7 @@ void uniformCostSearch(const vector<vector<int>>& initial_state) {
 }
 
 void misplacedTileSearch(const vector<vector<int>>& initial_state) {
-    priority_queue<PuzzleState*, vector<PuzzleState*>, CompareAStar> search_queue;
+    priority_queue<PuzzleState*, vector<PuzzleState*>, CompareUsingF> search_queue;
     unordered_set<string> explored;
 
     int h = countMisplacedTiles(initial_state);
