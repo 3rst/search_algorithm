@@ -105,17 +105,15 @@ void uniformCostSearch(const vector<vector<int>>& initial_state) {
     priority_queue<PuzzleState*, vector<PuzzleState*>, CompareUsingF> search_queue;
     unordered_set<string> explored;
     search_queue.push(new PuzzleState(initial_state, 0, 0));
-
+    string sig = stateToString(initial_state);
+    explored.insert(sig);
     int nodes_expanded = 0;
     int max_queue_size = 1;
 
     while (!search_queue.empty()) {
+        max_queue_size = max(max_queue_size, (int)search_queue.size());
         PuzzleState* node = search_queue.top();
         search_queue.pop();
-
-        string sig = stateToString(node->state);
-        if (explored.count(sig)) continue;
-        explored.insert(sig);
 
         cout << "The best state to expand with a g(n) = " << node->g << " and h(n) = 0 is...\n";
         printState(node->state);
@@ -130,12 +128,18 @@ void uniformCostSearch(const vector<vector<int>>& initial_state) {
         }
 
         auto children = expand(node);
+
         for (PuzzleState* child : children) {
+            string sig = stateToString(child->state);
+            if (explored.count(sig)) {
+                delete child;
+                continue;
+            }
             child->h = 0;
             child->f = child->g + child->h;
             search_queue.push(child);
+            explored.insert(stateToString(child->state));
         }
-        max_queue_size = max(max_queue_size, (int)search_queue.size());
     }
     cout << "Failure\n";
 }
@@ -146,20 +150,18 @@ void misplacedTileSearch(const vector<vector<int>>& initial_state) {
 
     int h = countMisplacedTiles(initial_state);
     search_queue.push(new PuzzleState(initial_state, 0, h));
+    string sig = stateToString(initial_state);
+    explored.insert(sig);
 
     int nodes_expanded = 0;
     int max_queue_size = 1;
 
     while (!search_queue.empty()) {
+        max_queue_size = max(max_queue_size, (int)search_queue.size());
         PuzzleState* node = search_queue.top();
         search_queue.pop();
 
-        string sig = stateToString(node->state);
-        if (explored.count(sig)) continue;
-        explored.insert(sig);
-
-        cout << "The best state to expand with a g(n) = " << node->g
-             << " and h(n) = " << node->h << " is...\n";
+        cout << "The best state to expand with a g(n) = " << node->g << " and h(n) = " << node->h << " is...\n";
         printState(node->state);
         nodes_expanded++;
 
@@ -172,12 +174,18 @@ void misplacedTileSearch(const vector<vector<int>>& initial_state) {
         }
 
         auto children = expand(node);
+
         for (PuzzleState* child : children) {
+            string sig = stateToString(child->state);
+            if (explored.count(sig)) {
+                delete child;
+                continue;
+            }
             child->h = countMisplacedTiles(child->state);
             child->f = child->g + child->h;
             search_queue.push(child);
+            explored.insert(sig);
         }
-        max_queue_size = max(max_queue_size, (int)search_queue.size());
     }
     cout << "Failure\n";
 }
@@ -189,19 +197,18 @@ void manhattanDistanceSearch(const vector<vector<int>>& initial_state) {
     int h = manhattanDistance(initial_state);
     search_queue.push(new PuzzleState(initial_state, 0, h));
 
+    string sig = stateToString(initial_state);
+    explored.insert(sig);
+
     int nodes_expanded = 0;
     int max_queue_size = 1;
 
     while (!search_queue.empty()) {
+        max_queue_size = max(max_queue_size, (int)search_queue.size());
         PuzzleState* node = search_queue.top();
         search_queue.pop();
 
-        string sig = stateToString(node->state);
-        if (explored.count(sig)) continue;
-        explored.insert(sig);
-
-        cout << "The best state to expand with a g(n) = " << node->g
-             << " and h(n) = " << node->h << " is...\n";
+        cout << "The best state to expand with a g(n) = " << node->g << " and h(n) = " << node->h << " is...\n";
         printState(node->state);
         nodes_expanded++;
 
@@ -214,12 +221,19 @@ void manhattanDistanceSearch(const vector<vector<int>>& initial_state) {
         }
 
         auto children = expand(node);
+
+
         for (PuzzleState* child : children) {
+            string sig = stateToString(child->state);
+            if (explored.count(sig)) {
+                delete child;
+                continue;
+            }
             child->h = manhattanDistance(child->state);
             child->f = child->g + child->h;
             search_queue.push(child);
+            explored.insert(sig);
         }
-        max_queue_size = max(max_queue_size, (int)search_queue.size());
     }
     cout << "Failure\n";
 }
