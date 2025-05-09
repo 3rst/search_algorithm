@@ -1,10 +1,10 @@
 # CS 205: Artificial Intelligence Project 1
 ## The Eight Puzzle, Dr. Eamonn Keogh
 
-Author: Milan Maragiri
-SID: 862548940
-Email: mmara031@ucr.edu
-Date: May 8th, 2025
+Author: Milan Maragiri  
+SID: 862548940  
+Email: mmara031@ucr.edu  
+Date: May 8th, 2025  
 
 The 8-puzzle is a classic problem in artificial intelligence involving a 3x3 grid of tiles, where eight numbered tiles are arranged with one blank space. It is a smaller version of the well-known 15-puzzle. The objective is to reach a specific goal configuration by sliding tiles into the blank space, one move at a time. The tiles are numbered from 1 to 8 so that each tile can be uniquely identified. Though the puzzle appears simple at first glance, finding an optimal solution path can become computationally challenging as depth increases, making it a useful benchmark for evaluating search algorithms.  
   
